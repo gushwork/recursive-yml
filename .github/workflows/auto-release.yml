@@ -2,7 +2,7 @@ name: Auto Release on Version Change
 
 on:
   push:
-    branches: [master]
+    branches: [main]
     paths:
       - "package.json"
 
