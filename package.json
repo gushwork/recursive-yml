@@ -1,6 +1,6 @@
 {
   "name": "recursive-yml",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Recursive ${...} placeholder substitution for YAML documents",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
