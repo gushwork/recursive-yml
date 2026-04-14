@@ -1,0 +1,33 @@
+{
+  "name": "recursive-yml",
+  "version": "0.1.0",
+  "description": "Recursive ${...} placeholder substitution for YAML documents",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "jsonpath-plus": "^10.4.0",
+    "yaml": "^2.8.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "typescript": "^5.7.2",
+    "vitest": "^4.1.4"
+  },
+  "keywords": [
+    "yaml",
+    "placeholder",
+    "substitution"
+  ],
+  "license": "MIT"
+}
