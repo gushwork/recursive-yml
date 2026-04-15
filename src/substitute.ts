@@ -33,6 +33,36 @@ export function findPlaceholderEnd(text: string, startIndex: number): number {
   return -1;
 }
 
+/**
+ * Splits placeholder content at the first top-level `:-` (not inside nested `${...}`).
+ * Left side is the path expression; right side is the default when the path is not found
+ * (same idea as bash `${parameter:-word}`).
+ */
+export function splitPathAndDefaultAtTopLevel(s: string): {
+  pathPart: string;
+  defaultPart: string | null;
+} {
+  let i = 0;
+  while (i < s.length) {
+    if (s[i] === '$' && s[i + 1] === '{') {
+      const end = findPlaceholderEnd(s, i);
+      if (end === -1) {
+        break;
+      }
+      i = end + 1;
+      continue;
+    }
+    if (s[i] === ':' && s[i + 1] === '-') {
+      return {
+        pathPart: s.slice(0, i),
+        defaultPart: s.slice(i + 2),
+      };
+    }
+    i += 1;
+  }
+  return { pathPart: s, defaultPart: null };
+}
+
 export function isWholeStringSinglePlaceholder(text: string): boolean {
   if (!text.startsWith('${')) return false;
   const end = findPlaceholderEnd(text, 0);
@@ -86,6 +116,56 @@ function throwLookupFailure(dottedPath: string): never {
   throw pathNotFound(dottedPath);
 }
 
+/**
+ * Expands nested `${...}` in the path expression, then looks up the dotted path.
+ * Also returns optional default text (after first top-level `:-`) when the path is missing.
+ */
+function resolvePathAndLookup(
+  inner: string,
+  context: Record<string, unknown>,
+  depth: number,
+): { pathResolved: string; val: unknown | typeof NOT_FOUND; defaultPart: string | null } {
+  const { pathPart, defaultPart } = splitPathAndDefaultAtTopLevel(inner);
+  const pathResolved = pathPart.includes('${')
+    ? resolvePathPlaceholders(pathPart, context, depth + 1)
+    : pathPart;
+
+  if (pathResolved.includes('${')) {
+    throw maxDepthExceeded();
+  }
+
+  const segments = pathResolved.split('.');
+  for (const seg of segments) {
+    if (seg.length > 0) {
+      assertSegmentNoSpaces(seg);
+    }
+  }
+
+  const val =
+    pathResolved.trim() === ''
+      ? NOT_FOUND
+      : lookupAtPath(context, pathResolved);
+  return { pathResolved, val, defaultPart };
+}
+
+function evaluatePlaceholderReplacement(
+  inner: string,
+  context: Record<string, unknown>,
+  depth: number,
+): string {
+  const { pathResolved, val, defaultPart } = resolvePathAndLookup(inner, context, depth);
+  if (val === NOT_FOUND) {
+    if (defaultPart !== null) {
+      return substituteMixedString(defaultPart, context, depth + 1);
+    }
+    throwLookupFailure(pathResolved);
+  }
+  if ((typeof val === 'object' && val !== null) || Array.isArray(val)) {
+    throw cannotEmbedNonPrimitive(pathResolved);
+  }
+  return val === null ? 'null' : String(val);
+}
+
 export function resolvePathPlaceholders(
   pathStr: string,
   context: Record<string, unknown>,
@@ -107,29 +187,7 @@ export function resolvePathPlaceholders(
       throw malformedUnclosed();
     }
     const inner = result.substring(start + 2, end);
-    const innerResolved = inner.includes('${')
-      ? resolvePathPlaceholders(inner, context, depth + 1)
-      : inner;
-
-    if (innerResolved.includes('${')) {
-      throw maxDepthExceeded();
-    }
-
-    const segments = innerResolved.split('.');
-    for (const seg of segments) {
-      if (seg.length > 0) {
-        assertSegmentNoSpaces(seg);
-      }
-    }
-
-    const val = lookupAtPath(context, innerResolved);
-    if (val === NOT_FOUND) {
-      throwLookupFailure(innerResolved);
-    }
-    if ((typeof val === 'object' && val !== null) || Array.isArray(val)) {
-      throw cannotEmbedNonPrimitive(innerResolved);
-    }
-    const replacement = String(val);
+    const replacement = evaluatePlaceholderReplacement(inner, context, depth);
     result = result.substring(0, start) + replacement + result.substring(end + 1);
   }
   return result;
@@ -156,19 +214,7 @@ export function substituteMixedString(
       throw malformedUnclosed();
     }
     const inner = result.substring(start + 2, end);
-    const pathResolved = resolvePathPlaceholders(inner, context, depth + 1);
-    const segments = pathResolved.split('.').filter(Boolean);
-    for (const seg of segments) {
-      assertSegmentNoSpaces(seg);
-    }
-    const val = lookupAtPath(context, pathResolved);
-    if (val === NOT_FOUND) {
-      throwLookupFailure(pathResolved);
-    }
-    if ((typeof val === 'object' && val !== null) || Array.isArray(val)) {
-      throw cannotEmbedNonPrimitive(pathResolved);
-    }
-    const replacement = val === null ? 'null' : String(val);
+    const replacement = evaluatePlaceholderReplacement(inner, context, depth + 1);
     result = result.substring(0, start) + replacement + result.substring(end + 1);
   }
   return result;
@@ -189,12 +235,11 @@ export function resolveStringNodeValue(
 
   if (isWholeStringSinglePlaceholder(value)) {
     const inner = value.substring(2, value.length - 1);
-    const pathResolved = resolvePathPlaceholders(inner, context, 0);
-    if (pathResolved.includes('${')) {
-      throw maxDepthExceeded();
-    }
-    const val = lookupAtPath(context, pathResolved);
+    const { pathResolved, val, defaultPart } = resolvePathAndLookup(inner, context, 0);
     if (val === NOT_FOUND) {
+      if (defaultPart !== null) {
+        return { kind: 'primitive', value: substituteMixedString(defaultPart, context, 0) };
+      }
       throwLookupFailure(pathResolved);
     }
     if (val !== null && typeof val === 'object') {

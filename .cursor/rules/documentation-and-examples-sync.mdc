@@ -1,0 +1,30 @@
+---
+description: Keep README, examples, CHANGELOG, CONTRIBUTING, and docs aligned with code and releases
+alwaysApply: true
+---
+
+# Documentation and examples sync
+
+When work changes **behavior**, **public API**, **CLI usage**, **configuration**, or **contributor workflow**, update the relevant artifacts in the same change set (or follow-up commit) so users and contributors are not misled.
+
+## What to touch
+
+| Artifact | Update when |
+|----------|-------------|
+| `README.md` | Install/usage, API surface, options, or quickstart change |
+| `examples/` | A new pattern is worth demonstrating, or an example is wrong or outdated |
+| `CHANGELOG.md` | User-visible fix, feature, or breaking change (follow existing section style) |
+| `CONTRIBUTING.md` | PR/process, test commands, or dev setup change |
+| `docs/` | Deeper reference or placeholder/grammar docs need to match implementation |
+
+## Rules
+
+- Prefer **one PR** that includes code/tests **and** doc/example updates when the change is user-facing.
+- If you only fix internals with **no** observable change, do **not** pad CHANGELOG or README.
+- **Examples** must run or stay accurate: if you change flags or imports, update `examples/` and any README inside example folders.
+- After edits, spot-check that links and file paths in README and docs still exist.
+
+## Do not
+
+- Add or expand markdown files outside this set unless the task explicitly asks for new docs.
+- Leave stale “coming soon” or contradictory statements next to updated code.

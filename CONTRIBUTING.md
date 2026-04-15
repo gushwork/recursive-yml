@@ -1,10 +1,10 @@
 # Contributing
 
-Thanks for your interest in improving **recursive-yml**.
+Thanks for your interest in improving **yaml-dot-resolve**.
 
 ## Getting started
 
-1. Clone the repository and open this package directory (`recursive-yml`).
+1. Clone the repository and open the package root (where this `package.json` lives).
 2. Install dependencies:
 
    ```bash
@@ -28,6 +28,16 @@ Thanks for your interest in improving **recursive-yml**.
 - Prefer small, focused changes with a clear description of behavior and motivation.
 - Add or update tests for any new behavior or bug fix.
 - Ensure `npm test` and `npm run build` pass before submitting.
+- For user-visible changes, add a short note under `[Unreleased]` in [CHANGELOG.md](CHANGELOG.md) (maintainers fold these into the next version at release time).
+
+## Releases
+
+- Tag versions with `vMAJOR.MINOR.PATCH` and publish to npm per [`.github/workflows/publish-npm.yml`](.github/workflows/publish-npm.yml) (or your usual release process).
+- Move `[Unreleased]` items into a dated section when cutting a release, and link the compare URLs at the bottom of the changelog like existing entries.
+
+## Repository topics (GitHub)
+
+Topics are set in the GitHub UI under **Settings → General → Topics**. Suggested labels for discovery: `yaml`, `nodejs`, `typescript`, `config`, `placeholder`, `interpolation`, `jsonpath`, `serverless`, `npm-package`.
 
 ## Code style
 

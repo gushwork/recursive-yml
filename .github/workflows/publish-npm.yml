@@ -51,5 +51,5 @@ jobs:
         run: |
           mkdir /tmp/smoke-test && cd /tmp/smoke-test
           npm init -y
-          npm install recursive-yml@latest --no-cache
-          node -e "const { processYml } = require('recursive-yml'); if (typeof processYml !== 'function') process.exit(1);"
+          npm install yaml-dot-resolve@latest --no-cache
+          node -e "const { processYml } = require('yaml-dot-resolve'); if (typeof processYml !== 'function') process.exit(1);"

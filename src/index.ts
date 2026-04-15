@@ -12,6 +12,7 @@ export {
   NOT_FOUND,
   resolvePathPlaceholders,
   resolveStringNodeValue,
+  splitPathAndDefaultAtTopLevel,
   substituteMixedString,
 } from './substitute';
 export { processYml } from './process';

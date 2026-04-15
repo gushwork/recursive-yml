@@ -1,0 +1,11 @@
+{
+  "name": "yaml-dot-resolve-example-stage-config",
+  "private": true,
+  "description": "Example: stage-based YAML placeholders with yaml-dot-resolve",
+  "scripts": {
+    "start": "node index.cjs"
+  },
+  "dependencies": {
+    "yaml-dot-resolve": "file:../.."
+  }
+}

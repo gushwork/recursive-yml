@@ -1,12 +1,16 @@
 {
-  "name": "recursive-yml",
+  "name": "yaml-dot-resolve",
   "version": "0.2.1",
-  "description": "Recursive ${...} placeholder substitution for YAML documents",
+  "description": "Recursive ${...} YAML placeholder substitution: stage-aware config, dotted paths, nested placeholders, and optional defaults (:-).",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "files": [
     "dist"
   ],
+  "homepage": "https://github.com/gushwork/recursive-yml#readme",
+  "bugs": {
+    "url": "https://github.com/gushwork/recursive-yml/issues"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/gushwork/recursive-yml.git"
@@ -31,7 +35,17 @@
   "keywords": [
     "yaml",
     "placeholder",
-    "substitution"
+    "substitution",
+    "interpolation",
+    "template",
+    "config",
+    "configuration",
+    "jsonpath",
+    "stage",
+    "environment",
+    "serverless",
+    "ci",
+    "typescript"
   ],
   "license": "MIT"
 }

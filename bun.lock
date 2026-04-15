@@ -3,7 +3,7 @@
   "configVersion": 1,
   "workspaces": {
     "": {
-      "name": "recursive-yml",
+      "name": "yaml-dot-resolve",
       "dependencies": {
         "jsonpath-plus": "^10.4.0",
         "yaml": "^2.8.3",

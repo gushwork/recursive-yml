@@ -1,0 +1,34 @@
+---
+description: Test-Driven Development — red-green-refactor for all feature and bugfix work
+alwaysApply: true
+---
+
+# Test-Driven Development (TDD)
+
+Follow **red → green → refactor** for new behavior, bug fixes, and behavior changes. No production code without a **failing test first**.
+
+## Iron rule
+
+- Do **not** add or change implementation until a test exists that fails for the **right reason** (missing or wrong behavior, not typos or setup mistakes).
+- If implementation was written before a failing test, **remove it** and start from the test (do not keep it as “reference”).
+
+## Cycle
+
+1. **RED**: Write one small test that describes desired behavior. Run tests and confirm it **fails** as expected (`npm test` or `npx vitest run path/to/file.test.ts`).
+2. **GREEN**: Write the **minimum** code to make that test pass. Run tests until green.
+3. **REFACTOR**: Improve structure with all tests still passing. Do not add new behavior in this step.
+
+## Tests
+
+- Prefer **behavior** and real code paths; avoid testing only mocks unless unavoidable.
+- One focused assertion or behavior per test; name tests after behavior (`rejects empty input`), not internals (`test1`).
+- For regressions and bugs: add a failing test that reproduces the bug, then fix.
+
+## Exceptions
+
+Only skip TDD after explicit human direction: throwaway spikes, generated-only output, or pure config with no logic.
+
+## Verification before claiming done
+
+- New or changed behavior is covered by tests that were seen **fail** before passing.
+- `npm test` passes with no unexpected warnings.

@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import { processYml } from './process';
 
-describe('recursive-yml processYml', () => {
+describe('yaml-dot-resolve processYml', () => {
   test('resolves ${custom.stage} placeholder to the given stage', async () => {
     const yml = 'stage: ${custom.stage}';
     const stage = 'dev';
@@ -112,6 +112,58 @@ describe('recursive-yml processYml', () => {
     await expect(processYml(yml, 'dev')).rejects.toThrow(
       'Placeholder path not found: nonexistent.path',
     );
+  });
+
+  test('uses default after top-level :- when path is not found', async () => {
+    const yml = 'key: ${missing.path:-fallback}';
+    const doc = await processYml(yml, 'dev');
+    expect(doc.toJS().key).toBe('fallback');
+  });
+
+  test('ignores default when path resolves', async () => {
+    const yml = 'a: hello\nkey: ${a:-ignored}';
+    const doc = await processYml(yml, 'dev');
+    expect(doc.toJS().key).toBe('hello');
+  });
+
+  test('default works in mixed string and preserves other segments', async () => {
+    const yml = 'key: "pre-${missing:-x}-post"';
+    const doc = await processYml(yml, 'dev');
+    expect(doc.toJS().key).toBe('pre-x-post');
+  });
+
+  test('default may contain colons and pipes', async () => {
+    const yml = 'key: ${missing:-a|b:c}';
+    const doc = await processYml(yml, 'dev');
+    expect(doc.toJS().key).toBe('a|b:c');
+  });
+
+  test('default may contain nested placeholders', async () => {
+    const yml = 'fallback: used\nkey: ${missing:-${fallback}}';
+    const doc = await processYml(yml, 'dev');
+    expect(doc.toJS().key).toBe('used');
+  });
+
+  test('default applies when nested path is missing', async () => {
+    const yml = [
+      'custom:',
+      '  dev:',
+      '    cpu: 256',
+      'cpu: ${custom.${custom.stage}.missing:-512}',
+    ].join('\n');
+    const doc = await processYml(yml, 'dev');
+    expect(doc.toJS().cpu).toBe('512');
+  });
+
+  test('pipe in dotted path segment is not confused with default delimiter', async () => {
+    const yml = [
+      'custom:',
+      '  dev:',
+      '    a|b: pipe-key',
+      'val: ${custom.${custom.stage}.a|b}',
+    ].join('\n');
+    const doc = await processYml(yml, 'dev');
+    expect(doc.toJS().val).toBe('pipe-key');
   });
 
   test('replaces node with array when placeholder resolves to array', async () => {
